@@ -8,6 +8,7 @@ namespace HotKey
 {
     /// <summary>
     /// Enumeration for virtual keys.
+    /// http://www.pinvoke.net/default.aspx/Enums.VirtualKeys
     /// </summary>
     public enum VirtualKeys
         : ushort

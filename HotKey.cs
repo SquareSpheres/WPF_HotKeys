@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HotKey
 {
@@ -16,7 +12,7 @@ namespace HotKey
 
     {
 
-        public event EventHandler HotKeyPressed;
+        public event EventHandler HotKeyPressedEvent;
 
         //Either ALT key must be held down.
         const int MOD_ALT = 0x0001;
@@ -80,9 +76,9 @@ namespace HotKey
         /// <summary>
         /// Called when the accociated hot key is pressed. Do not call this method manually. Use <see cref="HotKeyManager"/>
         /// </summary>
-        public void hotKeyPressed()
+        public void HotKeyPressed()
         {
-            HotKeyPressed?.Invoke(this, EventArgs.Empty);
+            HotKeyPressedEvent?.Invoke(this, EventArgs.Empty);
         }
 
 

@@ -26,9 +26,16 @@ namespace HotKey
             ComponentDispatcher.ThreadPreprocessMessage += ThreadMessageEventHandler;
         }
 
-        public static HotKeyManager getInstance()
+        /// <summary>
+        /// Get a hot key manager. There can only be on hot key manager. This is a singelton class.
+        /// </summary>
+        /// <returns>a <see cref="HotKeyManager"/></returns>
+        public static HotKeyManager GetInstance()
         {
-            if (hotKeyInstance == null) { hotKeyInstance = new HotKeyManager(); }
+            if (hotKeyInstance == null)
+            {
+                hotKeyInstance = new HotKeyManager();
+            }
             return hotKeyInstance;
         }
 
@@ -40,10 +47,9 @@ namespace HotKey
                 int id = (int)msg.wParam;
                 VirtualKeys virtualKey = (VirtualKeys)(((int)msg.lParam >> 16) & 0xFFFF);
 
-
                 if (hotKeys.ContainsKey(virtualKey))
                 {
-                    hotKeys[virtualKey].hotKeyPressed();
+                    hotKeys[virtualKey].HotKeyPressed();
                 }
             }
         }
@@ -58,11 +64,10 @@ namespace HotKey
         /// The running time of the algorithm would still be just fine. The chance of picking an already assigned ID 10 times in a row is 49%.
         /// 100 times in a row is 0.00081%, and 1000 times is 1.2593031e-31%. 
         /// 
-        /// This method does not care about number of keys on your keyboard. It will only find an available ID in the range 0-2147483647. If non avaiable, it will return false.
         /// </summary>
         /// <param name="in_val">The in value.</param>
         /// <returns></returns>
-        private bool generateRandomID(ref int in_val)
+        private bool GenerateRandomID(ref int in_val)
         {
             in_val = rand.Next(Int32.MaxValue);
             while (hotKeys_id.Contains(in_val) && hotKeys_id.Count < (Int32.MaxValue - 1))
@@ -80,10 +85,10 @@ namespace HotKey
         /// <param name="key">Keyboard key.</param>
         /// <param name="handler">A EventHandler/>.</param>
         /// <returns></returns>
-        public bool registerNewHotkey(VirtualKeys key, EventHandler handler)
+        public bool RegisterNewHotkey(VirtualKeys key, EventHandler handler)
         {
             int id = -1;
-            if (!generateRandomID(ref id))
+            if (!GenerateRandomID(ref id))
             {
                 Console.Error.WriteLine("Unable to create unique ID");
                 return false;
@@ -96,7 +101,7 @@ namespace HotKey
                 return false;
             }
 
-            hotkey.HotKeyPressed += handler;
+            hotkey.HotKeyPressedEvent += handler;
             hotKeys.Add(key, hotkey);
             hotKeys_id.Add(id);
 
@@ -105,7 +110,7 @@ namespace HotKey
 
 
         // TODO : Make bool, and get errorMsg from HotKey
-        public void unregisterHotKey(VirtualKeys key)
+        public void UnregisterHotKey(VirtualKeys key)
         {
             if (hotKeys.ContainsKey(key))
             {
@@ -117,7 +122,7 @@ namespace HotKey
         }
 
 
-        public bool addHotKeyAction(VirtualKeys key, EventHandler handler)
+        public bool AddHotKeyAction(VirtualKeys key, EventHandler handler)
         {
             if (!hotKeys.ContainsKey(key))
             {
@@ -125,11 +130,11 @@ namespace HotKey
                 return false;
             }
 
-            hotKeys[key].HotKeyPressed += handler;
+            hotKeys[key].HotKeyPressedEvent += handler;
             return true;
         }
 
-        public bool removeHotKeyAction(VirtualKeys key, EventHandler handler)
+        public bool RemoveHotKeyAction(VirtualKeys key, EventHandler handler)
         {
             if (!hotKeys.ContainsKey(key))
             {
@@ -137,7 +142,7 @@ namespace HotKey
                 return false;
             }
 
-            hotKeys[key].HotKeyPressed -= handler;
+            hotKeys[key].HotKeyPressedEvent -= handler;
             return true;
         }
 
@@ -147,7 +152,7 @@ namespace HotKey
         /// </summary>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public String[] getActiveHotKeys()
+        public String[] GetActiveHotKeys()
         {
             throw new NotImplementedException();
 
@@ -158,7 +163,7 @@ namespace HotKey
         /// </summary>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public String[] getAvailableHotKeys()
+        public String[] GetAvailableHotKeys()
         {
             throw new NotImplementedException();
         }
