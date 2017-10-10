@@ -43,11 +43,18 @@ namespace HotKey
 
         private int idCount;
 
+
         protected AbstractHotKeyManager()
         {
             ComponentDispatcher.ThreadPreprocessMessage += ThreadMessageEventHandler;
         }
 
+
+        /// <summary>
+        /// Generates a new unique identifier.
+        /// </summary>
+        /// <returns>A unique identifies</returns>
+        protected int GenerateId => idCount++;
 
         /// <summary>
         /// Thread message event handler.
@@ -68,18 +75,13 @@ namespace HotKey
             }
         }
 
-        /// <summary>
-        /// Generates a new unique identifier.
-        /// </summary>
-        /// <returns>A unique identifies</returns>
-        protected int GenerateID()
-        {
-            return idCount++;
-        }
+
 
         public abstract bool RegisterNewHotkey(VirtualKeys key, EventHandler handler);
         public abstract bool UnregisterHotKey(VirtualKeys key);
         public abstract bool AddHotKeyAction(VirtualKeys key, EventHandler handler);
         public abstract bool RemoveHotKeyAction(VirtualKeys key, EventHandler handler);
+        public abstract List<VirtualKeys> GetActiveHotKeys();
+        public abstract List<VirtualKeys> GetAvailableHotKeys();
     }
 }
