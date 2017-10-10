@@ -27,6 +27,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 
 namespace HotKey
 {
@@ -38,7 +39,7 @@ namespace HotKey
         /// <param name="key">Keyboard key.</param>
         /// <param name="handler">A EventHandler/>.</param>
         /// <returns>true if hotkey was successfully registered, false otherwise.</returns>
-         bool RegisterNewHotkey(VirtualKeys key, EventHandler handler);
+        bool RegisterNewHotkey(VirtualKeys key, EventHandler handler);
         /// <summary>
         /// Unregisters a hotkey.
         /// </summary>
@@ -59,5 +60,15 @@ namespace HotKey
         /// <param name="handler">The action.</param>
         /// <returns>true if action was successfully removed. false otherwise.</returns>
         bool RemoveHotKeyAction(VirtualKeys key, EventHandler handler);
+        /// <summary>
+        /// Gets the active hot keys.
+        /// </summary>
+        /// <returns>A <see cref="List{T}"/> of <see cref="VirtualKeys"/></returns>
+        List<VirtualKeys> GetActiveHotKeys();
+        /// <summary>
+        /// Gets the available hot keys.
+        /// </summary>
+        /// <returns>A <see cref="List{T}"/> of <see cref="VirtualKeys"/>k</returns>
+        List<VirtualKeys> GetAvailableHotKeys();
     }
 }
