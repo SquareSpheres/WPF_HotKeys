@@ -57,7 +57,7 @@ namespace HotKey
 
         public override bool RegisterNewHotkey(VirtualKeys key, EventHandler handler)
         {
-            int id = GenerateID();
+            int id = GenerateId;
 
             try
             {
@@ -121,22 +121,12 @@ namespace HotKey
             return true;
         }
 
-
-        /// <summary>
-        /// Gets all keys already assigned.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public List<VirtualKeys> GetActiveHotKeys()
+        public override List<VirtualKeys> GetActiveHotKeys()
         {
             return hotKeys.Keys.ToList();
         }
-        /// <summary>
-        /// Gets all available keys.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public List<VirtualKeys> GetAvailableHotKeys()
+
+        public override List<VirtualKeys> GetAvailableHotKeys()
         {
             IEnumerable<VirtualKeys> virtualKeys = Enum.GetValues(typeof(VirtualKeys)).Cast<VirtualKeys>();
             IEnumerable<VirtualKeys> activeVirtualKeys = GetActiveHotKeys();
