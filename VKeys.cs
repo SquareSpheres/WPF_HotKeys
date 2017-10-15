@@ -1,6 +1,8 @@
-﻿namespace HotKeysLib
-{
+﻿using System;
 
+namespace HotKeysLib
+{
+    [Flags]
     public enum Modifiers
 : uint
     {
