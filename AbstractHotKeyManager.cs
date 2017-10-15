@@ -56,15 +56,15 @@ namespace HotKeysLib
             public override bool Equals(object obj)
             {
                 return obj is KeyModifierCombination combination &&
-                       Key == combination.Key &&
-                       Modifiers == combination.Modifiers;
+                       Modifiers == combination.Modifiers &&
+                       Key == combination.Key;
             }
 
             public override int GetHashCode()
             {
-                var hashCode = 1342178661;
-                hashCode = hashCode * -1521134295 + Key.GetHashCode();
+                var hashCode = 628607405;
                 hashCode = hashCode * -1521134295 + Modifiers.GetHashCode();
+                hashCode = hashCode * -1521134295 + Key.GetHashCode();
                 return hashCode;
             }
         }
@@ -105,13 +105,13 @@ namespace HotKeysLib
             if (handled || msg.message != WM_HOTKEY) return;
             int id = (int)msg.wParam;
             VirtualKeys virtualKey = (VirtualKeys)(((int)msg.lParam >> 16) & 0xFFFF);
-            Modifiers modifiers = (Modifiers)((int)msg.lParam & 0x0000ffff);
+            Modifiers modifiers = (Modifiers)((int)msg.lParam & 0xFFFF);
 
             KeyModifierCombination keyModifierCombination = new KeyModifierCombination(virtualKey, modifiers);
 
             if (HotKeys.ContainsKey(keyModifierCombination))
             {
-                HotKeyPressedEventArgs args = new HotKeyPressedEventArgs(msg.pt_x, msg.pt_y, msg.time, id, virtualKey);
+                HotKeyPressedEventArgs args = new HotKeyPressedEventArgs(msg.pt_x, msg.pt_y, msg.time, id, virtualKey, modifiers);
                 HotKeys[keyModifierCombination].HotKeyPressed(args);
             }
         }
