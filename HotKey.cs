@@ -29,58 +29,53 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace HotKey
+namespace HotKeysLib
 {
+
     /// <summary>
-    /// Easily set global hoy keys. To unregister a hot key simply dispose the object. Associate an action with the hot key implementing the <see cref="IHotKeyAction"/>
+    /// Class used to represent a hotkey. The class should be used in combination with <see cref="IHotKeyManager"/>.
+    /// The class will clean up unmanaged resources on finalization.
     /// </summary>
     /// <seealso cref="System.IDisposable" />
-    public class HotKey : IDisposable
-
+    public sealed class HotKey : IDisposable
     {
 
-        public event EventHandler HotKeyPressedEvent;
+        public event EventHandler<HotKeyPressedEventArgs> HotKeyPressedEvent;
 
-        //Either ALT key must be held down.
-        const int MOD_ALT = 0x0001;
-        //Either CTRL key must be held down.
-        const int MOD_CONTROL = 0x0002;
-        //Changes the hotkey behavior so that the keyboard auto-repeat does not yield multiple hotkey notifications.
-        const int MOD_NOREPEAT = 0x4000;
+        private readonly VirtualKeys _key;
+        private bool _disposed;
 
-        // Last error message, if any
-        private String errorMsg;
+        public int Id { get; }
+        public string ErrorMsg { get; private set; }
 
-        // ID used for registering hot key
-        private readonly int id;
-        // Keyboard key
-        private readonly VirtualKeys key;
+        private HotKey(VirtualKeys key, int id)
+        {
+            _key = key;
+            Id = id;
+        }
 
-        private bool disposed;
 
-        public VirtualKeys Key => key;
-        public int ID => id;
+        ~HotKey() { Dispose(false); }
 
-        public string ErrorMsg { get => errorMsg; }
 
         /// <summary>
         /// Register a hot key. If the registration was successful it will return a <see cref="HotKey" /> object.
-        /// If registration was unsuccessful it will throw a <see cref="HotKeyException"/>, and a error message will be
-        /// saved to <see cref="ErrorMsg" />.
+        /// If registration was unsuccessful it will throw a <see cref="HotKeyException" />.
         /// </summary>
         /// <param name="key">The key.</param>
-        /// <param name="ID">The identifier.</param>
-        /// <exception cref="HotKeyException">If hotKey registration failed</exception>
+        /// <param name="modifiers">The modifiers.</param>
+        /// <param name="id">The identifier.</param>
         /// <returns></returns>
-        public static HotKey RegisterHotKey(VirtualKeys key, int ID)
+        /// <exception cref="HotKeyException">If hotKey registration failed</exception>
+        public static HotKey RegisterHotKey(VirtualKeys key, Modifiers modifiers, int id)
         {
-            if (!WindowsFunctions.RegisterHotKey(IntPtr.Zero, ID, MOD_NOREPEAT, (int)key))
+            if (!WindowsFunctions.RegisterHotKey(IntPtr.Zero, id, (uint)modifiers, (uint)key))
             {
                 throw new HotKeyException(new Win32Exception(Marshal.GetLastWin32Error()).Message);
             }
             else
             {
-                return new HotKey(key, ID);
+                return new HotKey(key, id);
             }
         }
 
@@ -90,34 +85,20 @@ namespace HotKey
         /// <exception cref="HotKeyException">If hotKey removal failed</exception>
         public void UnregisterHotKey()
         {
-            if (!WindowsFunctions.UnregisterHotKey(IntPtr.Zero, this.ID))
+            if (!WindowsFunctions.UnregisterHotKey(IntPtr.Zero, Id))
             {
-                errorMsg = new Win32Exception(Marshal.GetLastWin32Error()).Message;
+                ErrorMsg = new Win32Exception(Marshal.GetLastWin32Error()).Message;
                 throw new HotKeyException(ErrorMsg);
             }
         }
 
 
-        private HotKey(VirtualKeys key, int ID)
-        {
-            this.key = key;
-            this.id = ID;
-        }
-
-
-        ~HotKey()
-        {
-            Dispose(false);
-        }
-
-
         /// <summary>
-        /// Called when the accociated hot key is pressed. Do not call this method manually. Use <see cref="HotKeyManager"/>
+        /// Called when the associated hot key is pressed. Do not call this method manually. Use <see cref="HotKeyManager"/>
         /// </summary>
-        public void HotKeyPressed()
+        public void HotKeyPressed(HotKeyPressedEventArgs args)
         {
-            HotKeyPressedEvent?.Invoke(this, EventArgs.Empty);
-
+            HotKeyPressedEvent?.Invoke(this, args);
         }
 
 
@@ -127,21 +108,21 @@ namespace HotKey
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
-            if (disposed)
+            if (_disposed)
             {
                 return;
             }
 
             if (disposing)
             {
-                //dipose managed resoruces
+                //dispose managed resources
             }
 
             //dispose unmanaged resources
-            WindowsFunctions.UnregisterHotKey(IntPtr.Zero, this.id);
-            disposed = true;
+            WindowsFunctions.UnregisterHotKey(IntPtr.Zero, Id);
+            _disposed = true;
         }
 
 

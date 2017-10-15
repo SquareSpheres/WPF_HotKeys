@@ -30,20 +30,56 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Interop;
 
-namespace HotKey
+namespace HotKeysLib
 {
-   public abstract class AbstractHotKeyManager:IHotKeyManager
+
+    /// <inheritdoc />
+    /// <summary>
+    /// A abstract Hotkey manager implementing core functionality like the component dispatcher.
+    /// It also initializes containers for the hotkeys, and hotkeys_id.
+    /// </summary>
+    /// <seealso cref="T:HotKeysLib.IHotKeyManager" />
+    public abstract class AbstractHotKeyManager : IHotKeyManager
     {
+
+        protected class KeyModifierCombination
+        {
+            public KeyModifierCombination(VirtualKeys key, Modifiers modifiers)
+            {
+                Key = key;
+                Modifiers = modifiers;
+            }
+
+            public Modifiers Modifiers { get; }
+            public VirtualKeys Key { get; }
+
+            public override bool Equals(object obj)
+            {
+                return obj is KeyModifierCombination combination &&
+                       Key == combination.Key &&
+                       Modifiers == combination.Modifiers;
+            }
+
+            public override int GetHashCode()
+            {
+                var hashCode = 1342178661;
+                hashCode = hashCode * -1521134295 + Key.GetHashCode();
+                hashCode = hashCode * -1521134295 + Modifiers.GetHashCode();
+                return hashCode;
+            }
+        }
 
         // Message identifier
         protected const int WM_HOTKEY = 0x0312;
 
-        protected readonly Dictionary<VirtualKeys, HotKey> hotKeys = new Dictionary<VirtualKeys, HotKey>();
-        protected readonly HashSet<int> hotKeys_id = new HashSet<int>();
+        protected readonly Dictionary<KeyModifierCombination, HotKey> HotKeys = new Dictionary<KeyModifierCombination, HotKey>();
+        protected readonly HashSet<int> HotKeysId = new HashSet<int>();
 
-        private int idCount;
+        private int _idCount;
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractHotKeyManager"/> class.
+        /// </summary>
         protected AbstractHotKeyManager()
         {
             ComponentDispatcher.ThreadPreprocessMessage += ThreadMessageEventHandler;
@@ -54,7 +90,10 @@ namespace HotKey
         /// Generates a new unique identifier.
         /// </summary>
         /// <returns>A unique identifies</returns>
-        protected int GenerateId => idCount++;
+        protected int GetGenerateId()
+        {
+            return _idCount++;
+        }
 
         /// <summary>
         /// Thread message event handler.
@@ -63,25 +102,35 @@ namespace HotKey
         /// <param name="handled">if set to <c>true</c> [handled].</param>
         private void ThreadMessageEventHandler(ref MSG msg, ref bool handled)
         {
-            if (!handled && msg.message == WM_HOTKEY)
-            {
-                int id = (int)msg.wParam;
-                VirtualKeys virtualKey = (VirtualKeys)(((int)msg.lParam >> 16) & 0xFFFF);
+            if (handled || msg.message != WM_HOTKEY) return;
+            int id = (int)msg.wParam;
+            VirtualKeys virtualKey = (VirtualKeys)(((int)msg.lParam >> 16) & 0xFFFF);
+            Modifiers modifiers = (Modifiers)((int)msg.lParam & 0x0000ffff);
 
-                if (hotKeys.ContainsKey(virtualKey))
-                {
-                    hotKeys[virtualKey].HotKeyPressed();
-                }
+            KeyModifierCombination keyModifierCombination = new KeyModifierCombination(virtualKey, modifiers);
+
+            if (HotKeys.ContainsKey(keyModifierCombination))
+            {
+                HotKeyPressedEventArgs args = new HotKeyPressedEventArgs(msg.pt_x, msg.pt_y, msg.time, id, virtualKey);
+                HotKeys[keyModifierCombination].HotKeyPressed(args);
             }
         }
 
-
-
-        public abstract bool RegisterNewHotkey(VirtualKeys key, EventHandler handler);
-        public abstract bool UnregisterHotKey(VirtualKeys key);
-        public abstract bool AddHotKeyAction(VirtualKeys key, EventHandler handler);
-        public abstract bool RemoveHotKeyAction(VirtualKeys key, EventHandler handler);
-        public abstract List<VirtualKeys> GetActiveHotKeys();
-        public abstract List<VirtualKeys> GetAvailableHotKeys();
+        /// <inheritdoc cref="IHotKeyManager.RegisterNewHotkey(VirtualKeys,System.EventHandler{HotKeyPressedEventArgs})"/>
+        public abstract void RegisterNewHotkey(VirtualKeys key, EventHandler<HotKeyPressedEventArgs> handler);
+        /// <inheritdoc cref="IHotKeyManager.RegisterNewHotkey(VirtualKeys,Modifiers,System.EventHandler{HotKeyPressedEventArgs})"/>
+        public abstract void RegisterNewHotkey(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler);
+        /// <inheritdoc cref="IHotKeyManager.UnregisterHotKey(VirtualKeys)"/>
+        public abstract void UnregisterHotKey(VirtualKeys key);
+        /// <inheritdoc cref="IHotKeyManager.UnregisterHotKey(VirtualKeys,Modifiers)"/>
+        public abstract void UnregisterHotKey(VirtualKeys key, Modifiers modifiers);
+        /// <inheritdoc cref="IHotKeyManager.AddHotKeyAction"/>
+        public abstract void AddHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler);
+        /// <inheritdoc cref="IHotKeyManager.RemoveHotKeyAction"/>
+        public abstract void RemoveHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler);
+        /// <inheritdoc cref="IHotKeyManager.GetActiveHotKeys"/>
+        public abstract List<Tuple<VirtualKeys, Modifiers>> GetActiveHotKeys();
+        /// <inheritdoc cref="IHotKeyManager.IsHotKeyAvailable"/>
+        public abstract bool IsHotKeyAvailable(VirtualKeys virtualKey, Modifiers modifiers);
     }
 }

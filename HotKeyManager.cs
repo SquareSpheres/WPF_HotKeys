@@ -27,112 +27,120 @@
 */
 using System;
 using System.Collections.Generic;
-using System.Windows.Interop;
 using System.Linq;
 
-namespace HotKey
+namespace HotKeysLib
 {
 
+    /// <inheritdoc />
     /// <summary>
     /// Class for easily setting global hot keys in a WPF application
     /// </summary>
     public class HotKeyManager : AbstractHotKeyManager
     {
-        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
-        private static HotKeyManager hotKeyInstance;
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private static HotKeyManager _hotKeyInstance;
 
         /// <summary>
-        /// Get a hot key manager. There can only be on hot key manager. This is a singelton class.
+        /// Get a hot key manager. There can only be on hot key manager. This is a singleton class.
         /// </summary>
         /// <returns>a <see cref="HotKeyManager"/></returns>
         public static IHotKeyManager GetInstance()
         {
-            if (hotKeyInstance == null)
-            {
-                hotKeyInstance = new HotKeyManager();
-            }
-            return hotKeyInstance;
+            return _hotKeyInstance ?? (_hotKeyInstance = new HotKeyManager());
         }
 
 
-        public override bool RegisterNewHotkey(VirtualKeys key, EventHandler handler)
+        public override void RegisterNewHotkey(VirtualKeys key, EventHandler<HotKeyPressedEventArgs> handler)
         {
-            int id = GenerateId;
+            RegisterNewHotkey(key, 0, handler);
+        }
+
+        public override void RegisterNewHotkey(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler)
+        {
+            int id = GetGenerateId();
 
             try
             {
-                HotKey hotkey = HotKey.RegisterHotKey(key, id);
+                HotKey hotkey = HotKey.RegisterHotKey(key, modifiers, id);
                 hotkey.HotKeyPressedEvent += handler;
-                hotKeys.Add(key, hotkey);
-                hotKeys_id.Add(id);
-                return true;
+                HotKeys.Add(new KeyModifierCombination(key, modifiers), hotkey);
+                HotKeysId.Add(id);
             }
             catch (HotKeyException e)
             {
-                logger.Warn("Failed to register hotKey : {0}", e.Message);
-                return false;
+                Logger.Warn("Failed to register hotKey : {0}", e.Message);
+                throw;
             }
         }
 
-        public override bool UnregisterHotKey(VirtualKeys key)
+
+        public override void UnregisterHotKey(VirtualKeys key)
         {
-            if (!hotKeys.ContainsKey(key))
+            UnregisterHotKey(key, 0);
+        }
+
+        public override void UnregisterHotKey(VirtualKeys key, Modifiers modifiers)
+        {
+            KeyModifierCombination combination = new KeyModifierCombination(key, modifiers);
+            if (!HotKeys.ContainsKey(combination))
             {
-                logger.Warn("Hotkey {0} is not assigned", key);
-                return false;
+                String error = $"Failed to unregister hotKey : HotKey \"{key}+{modifiers}\" is not registered";
+                Logger.Warn(error);
+                throw new HotKeyException(error);
             }
 
             try
             {
-                HotKey tmpHotKey = hotKeys[key];
+                HotKey tmpHotKey = HotKeys[combination];
                 tmpHotKey.UnregisterHotKey();
-                hotKeys_id.Remove(tmpHotKey.ID);
-                hotKeys.Remove(tmpHotKey.Key);
-                return true;
+                HotKeysId.Remove(tmpHotKey.Id);
+                HotKeys.Remove(combination);
             }
             catch (HotKeyException e)
             {
-                logger.Warn("Failed to unregister hotKey : {0}", e.Message);
-                return false;
+                Logger.Warn("Failed to unregister hotKey : {0}", e.Message);
+                throw;
             }
         }
 
-        public override bool AddHotKeyAction(VirtualKeys key, EventHandler handler)
+        public override void AddHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler)
         {
-            if (!hotKeys.ContainsKey(key))
+            KeyModifierCombination combination = new KeyModifierCombination(key, modifiers);
+
+            if (!HotKeys.ContainsKey(combination))
             {
-                logger.Warn("No hotKey associated with {0}", key);
-                return false;
+                String error = $"Failed to unregister hotKey : {modifiers}+{key}";
+                Logger.Warn(error);
+                throw new HotKeyException(error);
             }
 
-            hotKeys[key].HotKeyPressedEvent += handler;
-            return true;
+            HotKeys[combination].HotKeyPressedEvent += handler;
         }
 
-        public override bool RemoveHotKeyAction(VirtualKeys key, EventHandler handler)
+        public override void RemoveHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler)
         {
-            if (!hotKeys.ContainsKey(key))
+            KeyModifierCombination combination = new KeyModifierCombination(key, modifiers);
+
+            if (!HotKeys.ContainsKey(combination))
             {
-                logger.Warn("No hotKey associated with {0}", key);
-                return false;
+                String error = $"No hotKey associated with {modifiers}+{key}";
+                Logger.Warn(error);
+                throw new HotKeyException(error);
             }
 
-            hotKeys[key].HotKeyPressedEvent -= handler;
-            return true;
+            HotKeys[combination].HotKeyPressedEvent -= handler;
         }
 
-        public override List<VirtualKeys> GetActiveHotKeys()
+
+        public override List<Tuple<VirtualKeys, Modifiers>> GetActiveHotKeys()
         {
-            return hotKeys.Keys.ToList();
+            return HotKeys.Select(hotKey => new Tuple<VirtualKeys, Modifiers>(hotKey.Key.Key, hotKey.Key.Modifiers)).ToList();
         }
 
-        public override List<VirtualKeys> GetAvailableHotKeys()
+        public override bool IsHotKeyAvailable(VirtualKeys virtualKey, Modifiers modifiers)
         {
-            IEnumerable<VirtualKeys> virtualKeys = Enum.GetValues(typeof(VirtualKeys)).Cast<VirtualKeys>();
-            IEnumerable<VirtualKeys> activeVirtualKeys = GetActiveHotKeys();
-            return virtualKeys.Except(activeVirtualKeys).ToList<VirtualKeys>();
+            return !HotKeys.ContainsKey(new KeyModifierCombination(virtualKey, modifiers));
         }
-
-
     }
 }
