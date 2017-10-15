@@ -37,7 +37,7 @@ namespace HotKeysLib
     /// The class will clean up unmanaged resources on finalization.
     /// </summary>
     /// <seealso cref="System.IDisposable" />
-    public sealed class HotKey : IDisposable
+    public class HotKey : IDisposable
     {
 
         public event EventHandler<HotKeyPressedEventArgs> HotKeyPressedEvent;
@@ -69,14 +69,13 @@ namespace HotKeysLib
         /// <exception cref="HotKeyException">If hotKey registration failed</exception>
         public static HotKey RegisterHotKey(VirtualKeys key, Modifiers modifiers, int id)
         {
-            if (!WindowsFunctions.RegisterHotKey(IntPtr.Zero, id, (uint)modifiers, (uint)key))
+
+            if (!WindowsFunctions.RegisterHotKey(IntPtr.Zero, id, (uint) modifiers, (uint)key))
             {
                 throw new HotKeyException(new Win32Exception(Marshal.GetLastWin32Error()).Message);
             }
-            else
-            {
-                return new HotKey(key, id);
-            }
+
+            return new HotKey(key, id);
         }
 
         /// <summary>
@@ -108,7 +107,7 @@ namespace HotKeysLib
             GC.SuppressFinalize(this);
         }
 
-        private void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
             {
