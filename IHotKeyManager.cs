@@ -29,46 +29,72 @@
 using System;
 using System.Collections.Generic;
 
-namespace HotKey
+namespace HotKeysLib
 {
+    /// <summary>
+    /// HotKeyManager interface
+    /// </summary>
     public interface IHotKeyManager
     {
         /// <summary>
-        /// Register a new hot key. If registration was unsuccessful it will return false, otherwise it will return true.
+        /// Register a hotkey.
         /// </summary>
         /// <param name="key">Keyboard key.</param>
         /// <param name="handler">A EventHandler/>.</param>
-        /// <returns>true if hotkey was successfully registered, false otherwise.</returns>
-        bool RegisterNewHotkey(VirtualKeys key, EventHandler handler);
+        /// <exception cref="HotKeyException">Thrown if registration fails in any way</exception>
+        void RegisterNewHotkey(VirtualKeys key, EventHandler<HotKeyPressedEventArgs> handler);
+        /// <summary>
+        /// Registers a hotkey with modifiers, i.e. you have to press the modifiers in combination with the key specified.
+        /// E.g. <see cref="Modifiers.MOD_CONTROL"/> with <see cref="VirtualKeys.A"/> means the hotkey will active if you
+        /// press Control+A
+        /// </summary>
+        /// <param name="key">Keyboard key.</param>
+        /// <param name="modifiers">The keys that must be pressed in combination with the key specified. You can supply</param>
+        /// <param name="handler">A EventHandler.
+        /// multiple by separating them with bitwise-or. E.g. MOD_CONTROL|MOD_ALT</param>
+        void RegisterNewHotkey(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler);
         /// <summary>
         /// Unregisters a hotkey.
         /// </summary>
         /// <param name="key">The key.</param>
-        /// <returns>true if unregister was successfull, false otherwise</returns>
-        bool UnregisterHotKey(VirtualKeys key);
+        /// <exception cref="HotKeyException">Thrown if unregistration fails in any way</exception>
+        void UnregisterHotKey(VirtualKeys key);
+        /// <summary>
+        /// Unregisters a hot key - modifier combination.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="modifiers">The modifiers.</param>
+        /// <exception cref="HotKeyException">Thrown if unregistration fails in any way</exception>
+        void UnregisterHotKey(VirtualKeys key, Modifiers modifiers);
         /// <summary>
         /// Add a action to an already initialized hotKey
         /// </summary>
         /// <param name="key">The key.</param>
+        /// <param name="modifiers">The modifiers.</param>
         /// <param name="handler">The action.</param>
-        /// <returns>true if action was successfully added. false otherwise.</returns>
-        bool AddHotKeyAction(VirtualKeys key, EventHandler handler);
+        /// <exception cref="HotKeyException">Thrown if Hotkey does not exist</exception>
+        void AddHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler);
         /// <summary>
         /// Removes a action from an already initialized hotKey
         /// </summary>
         /// <param name="key">The key.</param>
+        /// <param name="modifiers">The modifiers.</param>
         /// <param name="handler">The action.</param>
-        /// <returns>true if action was successfully removed. false otherwise.</returns>
-        bool RemoveHotKeyAction(VirtualKeys key, EventHandler handler);
+        /// <exception cref="HotKeyException">Thrown if action does not exist</exception>
+        void RemoveHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler);
         /// <summary>
         /// Gets the active hot keys.
         /// </summary>
-        /// <returns>A <see cref="List{T}"/> of <see cref="VirtualKeys"/></returns>
-        List<VirtualKeys> GetActiveHotKeys();
+        /// <returns>A <see cref="List{T}"/> of <see cref="Tuple"/> containing <see cref="VirtualKeys"/> and <see cref="Modifiers"/></returns>
+        List<Tuple<VirtualKeys, Modifiers>> GetActiveHotKeys();
         /// <summary>
-        /// Gets the available hot keys.
+        /// Determines whether a hotKey combination is available.
         /// </summary>
-        /// <returns>A <see cref="List{T}"/> of <see cref="VirtualKeys"/>k</returns>
-        List<VirtualKeys> GetAvailableHotKeys();
+        /// <param name="virtualKey">A virtual key.</param>
+        /// <param name="modifiers">The modifiers. use 0 if no modifiers is used</param>
+        /// <returns>
+        ///   <c>true</c> if the combination is available; otherwise, <c>false</c>.
+        /// </returns>
+        bool IsHotKeyAvailable(VirtualKeys virtualKey, Modifiers modifiers);
     }
 }
