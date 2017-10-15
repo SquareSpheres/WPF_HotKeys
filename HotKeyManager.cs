@@ -64,6 +64,8 @@ namespace HotKeysLib
             {
                 HotKey hotkey = HotKey.RegisterHotKey(key, modifiers, id);
                 hotkey.HotKeyPressedEvent += handler;
+                // remove no repeat before adding to list to avoid getting different hash
+                modifiers = (Modifiers)((uint)modifiers & 0xF);           
                 HotKeys.Add(new KeyModifierCombination(key, modifiers), hotkey);
                 HotKeysId.Add(id);
             }
@@ -82,6 +84,10 @@ namespace HotKeysLib
 
         public override void UnregisterHotKey(VirtualKeys key, Modifiers modifiers)
         {
+
+            // remove no repeat before adding to list to avoid getting different hash
+            modifiers = (Modifiers)((uint)modifiers & 0xF);
+
             KeyModifierCombination combination = new KeyModifierCombination(key, modifiers);
             if (!HotKeys.ContainsKey(combination))
             {
@@ -106,6 +112,8 @@ namespace HotKeysLib
 
         public override void AddHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler)
         {
+            // remove no repeat before adding to list to avoid getting different hash
+            modifiers = (Modifiers)((uint)modifiers & 0xF);
             KeyModifierCombination combination = new KeyModifierCombination(key, modifiers);
 
             if (!HotKeys.ContainsKey(combination))
@@ -120,6 +128,8 @@ namespace HotKeysLib
 
         public override void RemoveHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler)
         {
+            // remove no repeat before adding to list to avoid getting different hash
+            modifiers = (Modifiers)((uint)modifiers & 0xF);
             KeyModifierCombination combination = new KeyModifierCombination(key, modifiers);
 
             if (!HotKeys.ContainsKey(combination))
