@@ -5,7 +5,7 @@ HotKeysLib is a micro library for setting global hotkeys in a wpf(Windows Presen
 
 ### Installation
 
-just download the code and compile into a dll, use diretctly in your code.
+just download the code and compile into a dll, or use diretctly in your code.
 
 ### Example Usage
 
@@ -67,6 +67,7 @@ Mouse Position = 781,572
 ### Todos
 
  - Write tests
+ - Make option to set hotkey to specific application
 
 License
 ----
