@@ -1,22 +1,63 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+using System.Windows.Input;
 
 namespace HotKeysLib
 {
+
+    public static class ModifierConverter
+    {
+        private static Dictionary<Key, Modifiers> dictionary = new Dictionary<Key, Modifiers>()
+        {
+            {Key.LeftCtrl, Modifiers.MOD_CONTROL},
+            {Key.RightCtrl, Modifiers.MOD_CONTROL},
+            {Key.LeftAlt, Modifiers.MOD_ALT},
+            {Key.RightAlt, Modifiers.MOD_ALT},
+            {Key.LeftShift, Modifiers.MOD_SHIFT},
+            {Key.RightShift, Modifiers.MOD_SHIFT},
+            {Key.LWin, Modifiers.MOD_WIN},
+            {Key.RWin, Modifiers.MOD_WIN}
+        };
+
+        /// <summary>
+        /// Converts a <see cref="Key"/> to a <see cref="Modifiers"/>.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns>A Modifier, or 0 if the key is not associated with a Modifier</returns>
+        public static Modifiers FromKeyToModifier(Key key)
+        {
+            return dictionary.ContainsKey(key) ? dictionary[key] : 0;
+        }
+    }
+
+
+
     [Flags]
     public enum Modifiers
 : uint
     {
-        //Either ALT key must be held down.
-        MOD_ALT = 0x0001,
-        //Either CTRL key must be held down.
-        MOD_CONTROL = 0x0002,
-        //Either SHIFT key must be held down.
-        MOD_SHIFT = 0x0004,
-        //Either WINDOWS key was held down. These keys are labeled with the Windows logo. Keyboard shortcuts that involve the WINDOWS key are reserved for use by the operating system.
-        MOD_WIN = 0x0008,
-        //Changes the hotkey behavior so that the keyboard auto-repeat does not yield multiple hotkey notifications.
-        MOD_NOREPEAT = 0x4000,
 
+        /// <summary>
+        ///Either ALT key must be held down.
+        /// </summary>
+        MOD_ALT = 0x0001,
+        /// <summary>
+        ///Either CTRL key must be held down.
+        /// </summary>
+        MOD_CONTROL = 0x0002,
+        /// <summary>
+        ///Either SHIFT key must be held down.
+        /// </summary>
+        MOD_SHIFT = 0x0004,
+        /// <summary>
+        ///Either WINDOWS key was held down. These keys are labeled with the Windows logo. Keyboard shortcuts that involve the WINDOWS key are reserved for use by the operating system.
+        /// </summary>
+        MOD_WIN = 0x0008,
+        /// <summary>
+        ///Changes the hotkey behavior so that the keyboard auto-repeat does not yield multiple hotkey notifications.
+        /// </summary>
+        MOD_NOREPEAT = 0x4000,
 
     }
 
