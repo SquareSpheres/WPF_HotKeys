@@ -51,21 +51,23 @@ namespace HotKeysLib
         }
 
 
+        /// <inheritdoc />
         public override void RegisterNewHotkey(VirtualKeys key, EventHandler<HotKeyPressedEventArgs> handler)
         {
             RegisterNewHotkey(key, 0, handler);
         }
 
+        /// <inheritdoc />
         public override void RegisterNewHotkey(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler)
         {
             int id = GetGenerateId();
 
             try
             {
-                HotKey hotkey = HotKey.RegisterHotKey(key, modifiers, id);
+                HotKey hotkey = HotKey.RegisterHotKey(IntPtr.Zero, key, modifiers, id);
                 hotkey.HotKeyPressedEvent += handler;
                 // remove no repeat before adding to list to avoid getting different hash
-                modifiers = (Modifiers)((uint)modifiers & 0xF);           
+                modifiers = (Modifiers)((uint)modifiers & 0xF);
                 HotKeys.Add(new KeyModifierCombination(key, modifiers), hotkey);
                 HotKeysId.Add(id);
             }
@@ -77,11 +79,13 @@ namespace HotKeysLib
         }
 
 
+        /// <inheritdoc />
         public override void UnregisterHotKey(VirtualKeys key)
         {
             UnregisterHotKey(key, 0);
         }
 
+        /// <inheritdoc />
         public override void UnregisterHotKey(VirtualKeys key, Modifiers modifiers)
         {
 
@@ -110,6 +114,19 @@ namespace HotKeysLib
             }
         }
 
+        //TODO EXEPTION HANDELING
+        /// <inheritdoc />
+        public override void UnregisterAll()
+        {
+            foreach (var hotKeysValue in HotKeys.Values)
+            {
+                hotKeysValue.UnregisterHotKey();
+            }
+
+            HotKeys.Clear();
+        }
+
+        /// <inheritdoc />
         public override void AddHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler)
         {
             // remove no repeat before adding to list to avoid getting different hash
@@ -126,6 +143,7 @@ namespace HotKeysLib
             HotKeys[combination].HotKeyPressedEvent += handler;
         }
 
+        /// <inheritdoc />
         public override void RemoveHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler)
         {
             // remove no repeat before adding to list to avoid getting different hash
@@ -143,11 +161,13 @@ namespace HotKeysLib
         }
 
 
+        /// <inheritdoc />
         public override List<Tuple<VirtualKeys, Modifiers>> GetActiveHotKeys()
         {
             return HotKeys.Select(hotKey => new Tuple<VirtualKeys, Modifiers>(hotKey.Key.Key, hotKey.Key.Modifiers)).ToList();
         }
 
+        /// <inheritdoc />
         public override bool IsHotKeyAvailable(VirtualKeys virtualKey, Modifiers modifiers)
         {
             return !HotKeys.ContainsKey(new KeyModifierCombination(virtualKey, modifiers));
