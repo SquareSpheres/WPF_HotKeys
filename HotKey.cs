@@ -62,15 +62,16 @@ namespace HotKeysLib
         /// Register a hot key. If the registration was successful it will return a <see cref="HotKey" /> object.
         /// If registration was unsuccessful it will throw a <see cref="HotKeyException" />.
         /// </summary>
+        /// <param name="hWnd">Window Handle.</param>
         /// <param name="key">The key.</param>
         /// <param name="modifiers">The modifiers.</param>
         /// <param name="id">The identifier.</param>
         /// <returns></returns>
         /// <exception cref="HotKeyException">If hotKey registration failed</exception>
-        public static HotKey RegisterHotKey(VirtualKeys key, Modifiers modifiers, int id)
+        public static HotKey RegisterHotKey(IntPtr hWnd, VirtualKeys key, Modifiers modifiers, int id)
         {
 
-            if (!WindowsFunctions.RegisterHotKey(IntPtr.Zero, id, (uint) modifiers, (uint)key))
+            if (!WindowsFunctions.RegisterHotKey(hWnd, id, (uint)modifiers, (uint)key))
             {
                 throw new HotKeyException(new Win32Exception(Marshal.GetLastWin32Error()).Message);
             }
