@@ -42,15 +42,35 @@ namespace HotKeysLib
     public abstract class AbstractHotKeyManager : IHotKeyManager
     {
 
+        /// <summary>
+        /// Class containing a key, and a modifier. Used in the Dictionary <see cref="AbstractHotKeyManager.HotKeys"/>
+        /// </summary>
         protected class KeyModifierCombination
         {
+
+            /// <summary>
+            /// Initialize a KeyModifierCombination.
+            /// </summary>
+            /// <param name="key">A virtual key</param>
+            /// <param name="modifiers">A modifier</param>
             public KeyModifierCombination(VirtualKeys key, Modifiers modifiers)
             {
                 Key = key;
                 Modifiers = modifiers;
             }
-
+            /// <summary>
+            /// Gets the modifiers.
+            /// </summary>
+            /// <value>
+            /// The modifiers.
+            /// </value>
             public Modifiers Modifiers { get; }
+            /// <summary>
+            /// Gets the key.
+            /// </summary>
+            /// <value>
+            /// The key.
+            /// </value>
             public VirtualKeys Key { get; }
 
             public override bool Equals(object obj)
@@ -69,7 +89,9 @@ namespace HotKeysLib
             }
         }
 
-        // Message identifier
+        /// <summary>
+        /// Message identifier
+        /// </summary>
         protected const int WM_HOTKEY = 0x0312;
 
         protected readonly Dictionary<KeyModifierCombination, HotKey> HotKeys = new Dictionary<KeyModifierCombination, HotKey>();
@@ -124,6 +146,8 @@ namespace HotKeysLib
         public abstract void UnregisterHotKey(VirtualKeys key);
         /// <inheritdoc cref="IHotKeyManager.UnregisterHotKey(VirtualKeys,Modifiers)"/>
         public abstract void UnregisterHotKey(VirtualKeys key, Modifiers modifiers);
+        /// <inheritdoc cref="IHotKeyManager.UnregisterAll"/>
+        public abstract void UnregisterAll();
         /// <inheritdoc cref="IHotKeyManager.AddHotKeyAction"/>
         public abstract void AddHotKeyAction(VirtualKeys key, Modifiers modifiers, EventHandler<HotKeyPressedEventArgs> handler);
         /// <inheritdoc cref="IHotKeyManager.RemoveHotKeyAction"/>
