@@ -67,6 +67,10 @@ namespace HotKeysLib
         /// <exception cref="HotKeyException">Thrown if unregistration fails in any way</exception>
         void UnregisterHotKey(VirtualKeys key, Modifiers modifiers);
         /// <summary>
+        /// Unregisters all active hot keys.
+        /// </summary>
+        void UnregisterAll();
+        /// <summary>
         /// Add a action to an already initialized hotKey
         /// </summary>
         /// <param name="key">The key.</param>
