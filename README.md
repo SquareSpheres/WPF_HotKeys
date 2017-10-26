@@ -50,7 +50,9 @@ Register CTRL-ALt-8 as a hotkey. When the hotkey is pressed, it will simplt prin
 
         public void doSomething(Object sender, HotKeyPressedEventArgs args)
         {
-            Console.WriteLine("{" + args.Modifiers + "} - " + args.Key + " pressed at " + args.Time);
+            TimeSpan timeSpan = TimeSpan.FromMilliseconds(args.Time);
+            String time = String.Format("{0}h:{1}m:{2}s",timeSpan.Hours,timeSpan.Minutes,timeSpan.Seconds);
+            Console.WriteLine("{" + args.Modifiers + "} - " + args.Key + " pressed at " + time);
             Console.WriteLine("Hotkey ID = " + args.HotKeyId);
             Console.WriteLine("Mouse Position = " + args.PtX + "," + args.PtY);
         }
@@ -59,7 +61,7 @@ Register CTRL-ALt-8 as a hotkey. When the hotkey is pressed, it will simplt prin
 
 ```
 #Output example : 
-{MOD_ALT, MOD_CONTROL} - N8 pressed at 771137625
+{MOD_ALT, MOD_CONTROL} - N8 pressed at 18h:22m:56s
 Hotkey ID = 0
 Mouse Position = 781,572
 ```
