@@ -97,7 +97,7 @@ namespace HotKeysLib
         protected readonly Dictionary<KeyModifierCombination, HotKey> HotKeys = new Dictionary<KeyModifierCombination, HotKey>();
         protected readonly HashSet<int> HotKeysId = new HashSet<int>();
 
-        private int _idCount;
+        private int _idCount = 1834067;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractHotKeyManager"/> class.
