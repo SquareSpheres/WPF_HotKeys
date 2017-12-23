@@ -114,7 +114,7 @@ namespace HotKeysLib
             }
         }
 
-        //TODO EXEPTION HANDELING
+        //TODO EXCEPTION HANDLING
         /// <inheritdoc />
         public override void UnregisterAll()
         {

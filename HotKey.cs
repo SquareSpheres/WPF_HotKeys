@@ -102,12 +102,17 @@ namespace HotKeysLib
         }
 
 
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Dispose unmanaged resources
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
@@ -124,7 +129,5 @@ namespace HotKeysLib
             WindowsFunctions.UnregisterHotKey(IntPtr.Zero, Id);
             _disposed = true;
         }
-
-
     }
 }

@@ -73,6 +73,8 @@ namespace HotKeysLib
             /// </value>
             public VirtualKeys Key { get; }
 
+
+            /// <inheritdoc />
             public override bool Equals(object obj)
             {
                 return obj is KeyModifierCombination combination &&
@@ -80,6 +82,8 @@ namespace HotKeysLib
                        Key == combination.Key;
             }
 
+
+            /// <inheritdoc />
             public override int GetHashCode()
             {
                 var hashCode = 628607405;
