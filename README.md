@@ -1,7 +1,6 @@
 # HotKeysLib
 
-HotKeysLib is a micro library for setting global hotkeys in a wpf(Windows Presentation Foundation) application. Save yourself the trouble of calling unmanaged code, and bothering with the windows API. 
-
+Set global hotkeys in a wpf(Windows Presentation Foundation) application. 
 
 ### Installation
 
